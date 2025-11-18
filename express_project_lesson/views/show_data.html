@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>All Users</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+</head>
+
+<body class="bg-light">
+  <div class="container my-5">
+    <h2 class="text-center text-primary mb-4">All Users</h2>
+    <table class="table table-bordered table-hover shadow-sm">
+      <thead class="table-dark">
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Edit</th>
+          <th>Action</th>
+          <th>Details</th>
+          
+        </tr>
+      </thead>
+      <tbody id="userTableBody">
+        <!-- Data dynamically added from JS -->
+      </tbody>
+    </table>
+
+    <div class="text-center mt-4">
+      <a href="/user" class="btn btn-success">Add New User</a>
+    </div>
+  </div>
+  <script>
+    fetch("/api/show")
+      .then((res) => res.json())
+      .then((data) => {
+        const tbody = document.getElementById("userTableBody");
+        data.forEach((user) => {
+          const row = `<tr><td>${user.username}</td><td>${user.password}</td>
+            <td><button class="btn btn-danger btn-sm" onclick="updateUsers('${user._id}','${user.username}','${user.password}')">Edit</button></td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="deleteUser('${user._id}')">Delete</button>
+              </td>
+              <td>
+                <button class="btn btn-info btn-sm" onclick="oneUser('${user._id}')">Details</button>
+              </td>
+              </tr>`;
+          tbody.innerHTML += row;
+        });
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+
+    function deleteUser(id) {
+      fetch(`/api/delete/${id}`, { method: "DELETE" })
+        .then((res) => res.json())
+        .then((data) => {
+          alert(data.message);
+          location.reload();
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    }
+
+    function updateUsers(id,oldname,oldpassword){
+      const username=prompt('Enter new username:-',oldname);
+      const password=prompt('Enter new password:-',oldpassword);
+      if(username && password){
+         fetch(`/api/update/${id}`,{
+          method: 'PUT',
+          headers:{
+            'Content-Type': 'application/json'
+          },
+          body:JSON.stringify({username,password})
+         }).then(res=>res.json()).then(data=>{
+          alert(data.message);
+          location.reload();
+         }).catch(err=>{
+          console.log(err);
+         })
+
+      }
+      else{
+        alert('Username and password cannot be empty');
+      }
+     
+    }
+    //get one user
+    function oneUser(id){
+      window.location.href=`/userone/${id}`;
+    }
+    
+  </script>
+</body>
+
+</html>
